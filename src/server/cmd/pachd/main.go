@@ -41,6 +41,7 @@ import (
 	pfs_server "github.com/pachyderm/pachyderm/v2/src/server/pfs/server"
 	pps_server "github.com/pachyderm/pachyderm/v2/src/server/pps/server"
 	"github.com/pachyderm/pachyderm/v2/src/server/pps/server/githook"
+	"github.com/pachyderm/pachyderm/v2/src/server/sql"
 	txnserver "github.com/pachyderm/pachyderm/v2/src/server/transaction/server"
 	transactionclient "github.com/pachyderm/pachyderm/v2/src/transaction"
 	"github.com/pachyderm/pachyderm/v2/src/version"
@@ -679,6 +680,10 @@ func doFullMode(config interface{}) (retErr error) {
 	go waitForError("Prometheus Server", errChan, requireNoncriticalServers, func() error {
 		http.Handle("/metrics", promhttp.Handler())
 		return http.ListenAndServe(fmt.Sprintf(":%v", assets.PrometheusPort), nil)
+	})
+
+	go waitForError("SQL Server", errChan, requireNoncriticalServers, func() error {
+		return sql.Serve(env.SQLPort)
 	})
 	return <-errChan
 }

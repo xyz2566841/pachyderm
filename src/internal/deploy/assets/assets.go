@@ -177,6 +177,7 @@ type AssetOpts struct {
 	TracePort   int32
 	HTTPPort    int32
 	PeerPort    int32
+	SQLPort     int32
 
 	// NoGuaranteed will not generate assets that have both resource limits and
 	// resource requests set which causes kubernetes to give the pods
@@ -532,6 +533,9 @@ func PachdDeployment(opts *AssetOpts, objectStoreBackend Backend, hostPath strin
 	if opts.PeerPort == 0 {
 		opts.PeerPort = 653
 	}
+	if opts.SQLPort == 0 {
+		opts.SQLPort = 3306
+	}
 	mem := resource.MustParse(opts.BlockCacheSize)
 	mem.Add(resource.MustParse(opts.PachdNonCacheMemRequest))
 	cpu := resource.MustParse(opts.PachdCPURequest)
@@ -791,6 +795,13 @@ func PachdService(opts *AssetOpts) *v1.Service {
 					NodePort:   30656,
 					Protocol:   v1.ProtocolTCP,
 					TargetPort: intstr.FromInt(656),
+				},
+				{
+					Port:       3306,
+					Name:       "sql-port",
+					NodePort:   30306,
+					Protocol:   v1.ProtocolTCP,
+					TargetPort: intstr.FromInt(3306),
 				},
 			},
 		},

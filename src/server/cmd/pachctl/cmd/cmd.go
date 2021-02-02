@@ -534,6 +534,7 @@ This resets the cluster to its initial state.`,
 	var uiWebsocketPort uint16
 	var pfsPort uint16
 	var s3gatewayPort uint16
+	var sqlPort uint16
 	var namespace string
 	portForward := &cobra.Command{
 		Short: "Forward a port on the local machine to pachd. This command blocks.",
@@ -635,6 +636,16 @@ This resets the cluster to its initial state.`,
 				successCount++
 			}
 
+			fmt.Println("Forwarding the SQL port...")
+			port, err = fw.RunForSQL(sqlPort)
+			if err != nil {
+				fmt.Printf("port forwarding failed: %v\n", err)
+			} else {
+				fmt.Printf("listening on port %d\n", port)
+				context.PortForwarders["sql"] = uint32(port)
+				successCount++
+			}
+
 			if successCount == 0 {
 				return errors.New("failed to start port forwarders")
 			}
@@ -678,6 +689,7 @@ This resets the cluster to its initial state.`,
 	portForward.Flags().Uint16VarP(&uiWebsocketPort, "proxy-port", "x", 30081, "The local port to bind Pachyderm's dash proxy service to.")
 	portForward.Flags().Uint16VarP(&pfsPort, "pfs-port", "f", 30652, "The local port to bind PFS over HTTP to.")
 	portForward.Flags().Uint16VarP(&s3gatewayPort, "s3gateway-port", "s", 30600, "The local port to bind the s3gateway to.")
+	portForward.Flags().Uint16Var(&sqlPort, "sql-port", 30306, "The local port to bind the SQL server to.")
 	portForward.Flags().StringVar(&namespace, "namespace", "", "Kubernetes namespace Pachyderm is deployed in.")
 	subcommands = append(subcommands, cmdutil.CreateAlias(portForward, "port-forward"))
 

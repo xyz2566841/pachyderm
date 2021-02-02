@@ -26,6 +26,7 @@ type GlobalConfiguration struct {
 	LokiPort      string `env:"LOKI_SERVICE_PORT"`
 	SamlPort      uint16 `env:"SAML_PORT,default=654"`
 	OidcPort      uint16 `env:"OIDC_PORT,default=657"`
+	SQLPort       uint16 `env:"SQL_PORT,default=3306"`
 
 	// PPSSpecCommitID is only set for workers and sidecar pachd instances.
 	// Because both pachd and worker need to know the spec commit (the worker so

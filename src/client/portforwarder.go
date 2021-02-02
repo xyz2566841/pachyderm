@@ -189,6 +189,11 @@ func (f *PortForwarder) RunForS3Gateway(localPort uint16) (uint16, error) {
 	return f.Run("pachd", localPort, 600)
 }
 
+// RunForSQL creates a port forwarder for the SQL server
+func (f *PortForwarder) RunForSQL(localPort uint16) (uint16, error) {
+	return f.Run("pachd", localPort, 3306)
+}
+
 // Close shuts down port forwarding.
 func (f *PortForwarder) Close() {
 	defer f.logger.Close()
