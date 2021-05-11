@@ -292,7 +292,6 @@ func standardDeployCmds() []*cobra.Command {
 	var outputFormat string
 	var namespace string
 	var serverCert string
-	var dashOnly bool
 	var etcdCPURequest string
 	var etcdMemRequest string
 	var etcdNodes int
@@ -328,7 +327,6 @@ func standardDeployCmds() []*cobra.Command {
 		cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Don't actually deploy pachyderm to Kubernetes, instead just print the manifest. Note that a pachyderm context will not be created, unless you also use `--create-context`.")
 		cmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format. One of: json|yaml")
 		cmd.Flags().StringVar(&logLevel, "log-level", "info", "The level of log messages to print options are, from least to most verbose: \"error\", \"info\", \"debug\".")
-		cmd.Flags().BoolVar(&dashOnly, "dashboard-only", false, "Only deploy the Pachyderm UI (experimental), without the rest of pachyderm. This is for launching the UI adjacent to an existing Pachyderm cluster. After deployment, run \"pachctl port-forward\" to connect")
 		cmd.Flags().BoolVar(&noDash, "no-dashboard", false, "Don't deploy the Pachyderm UI alongside Pachyderm (experimental).")
 		cmd.Flags().StringVar(&registry, "registry", "", "The registry to pull images from.")
 		cmd.Flags().StringVar(&imagePullSecret, "image-pull-secret", "", "A secret in Kubernetes that's needed to pull from your private registry.")
@@ -451,7 +449,7 @@ func standardDeployCmds() []*cobra.Command {
 			Metrics:                    cfg == nil || cfg.V2.Metrics,
 			PachdCPURequest:            pachdCPURequest,
 			PachdNonCacheMemRequest:    pachdNonCacheMemRequest,
-			DashOnly:                   dashOnly,
+			DashOnly:                   false, //Option to not deploy dash removed
 			NoDash:                     noDash,
 			DashImage:                  dashImage,
 			Registry:                   registry,
