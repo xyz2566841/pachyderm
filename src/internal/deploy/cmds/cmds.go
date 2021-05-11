@@ -306,8 +306,6 @@ func standardDeployCmds() []*cobra.Command {
 	var logLevel string
 	var noDash bool
 	var noExposeDockerSocket bool
-	var noGuaranteed bool
-	var noRBAC bool
 	var pachdCPURequest string
 	var pachdNonCacheMemRequest string
 	var registry string
@@ -330,8 +328,6 @@ func standardDeployCmds() []*cobra.Command {
 		cmd.Flags().BoolVar(&noDash, "no-dashboard", false, "Don't deploy the Pachyderm UI alongside Pachyderm (experimental).")
 		cmd.Flags().StringVar(&registry, "registry", "", "The registry to pull images from.")
 		cmd.Flags().StringVar(&imagePullSecret, "image-pull-secret", "", "A secret in Kubernetes that's needed to pull from your private registry.")
-		cmd.Flags().BoolVar(&noGuaranteed, "no-guaranteed", false, "Don't use guaranteed QoS for etcd and pachd deployments. Turning this on (turning guaranteed QoS off) can lead to more stable local clusters (such as on Minikube), it should normally be used for production clusters.")
-		cmd.Flags().BoolVar(&noRBAC, "no-rbac", false, "Don't deploy RBAC roles for Pachyderm. (for k8s versions prior to 1.8)")
 		cmd.Flags().BoolVar(&localRoles, "local-roles", false, "Use namespace-local roles instead of cluster roles. Ignored if --no-rbac is set.")
 		cmd.Flags().StringVar(&namespace, "namespace", "", "Kubernetes namespace to deploy Pachyderm to.")
 		cmd.Flags().BoolVar(&noExposeDockerSocket, "no-expose-docker-socket", false, "Don't expose the Docker socket to worker containers. This limits the privileges of workers which prevents them from automatically setting the container's working dir and user.")
@@ -454,8 +450,8 @@ func standardDeployCmds() []*cobra.Command {
 			DashImage:                  dashImage,
 			Registry:                   registry,
 			ImagePullSecret:            imagePullSecret,
-			NoGuaranteed:               noGuaranteed,
-			NoRBAC:                     noRBAC,
+			NoGuaranteed:               false,
+			NoRBAC:                     false,
 			LocalRoles:                 localRoles,
 			Namespace:                  namespace,
 			NoExposeDockerSocket:       noExposeDockerSocket,
