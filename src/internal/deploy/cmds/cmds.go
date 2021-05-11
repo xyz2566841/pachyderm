@@ -292,7 +292,6 @@ func standardDeployCmds() []*cobra.Command {
 	var outputFormat string
 	var namespace string
 	var serverCert string
-	var dashImage string
 	var dashOnly bool
 	var etcdCPURequest string
 	var etcdMemRequest string
@@ -333,7 +332,6 @@ func standardDeployCmds() []*cobra.Command {
 		cmd.Flags().BoolVar(&noDash, "no-dashboard", false, "Don't deploy the Pachyderm UI alongside Pachyderm (experimental).")
 		cmd.Flags().StringVar(&registry, "registry", "", "The registry to pull images from.")
 		cmd.Flags().StringVar(&imagePullSecret, "image-pull-secret", "", "A secret in Kubernetes that's needed to pull from your private registry.")
-		cmd.Flags().StringVar(&dashImage, "dash-image", "", "Image URL for pachyderm dashboard")
 		cmd.Flags().BoolVar(&noGuaranteed, "no-guaranteed", false, "Don't use guaranteed QoS for etcd and pachd deployments. Turning this on (turning guaranteed QoS off) can lead to more stable local clusters (such as on Minikube), it should normally be used for production clusters.")
 		cmd.Flags().BoolVar(&noRBAC, "no-rbac", false, "Don't deploy RBAC roles for Pachyderm. (for k8s versions prior to 1.8)")
 		cmd.Flags().BoolVar(&localRoles, "local-roles", false, "Use namespace-local roles instead of cluster roles. Ignored if --no-rbac is set.")
@@ -427,9 +425,7 @@ func standardDeployCmds() []*cobra.Command {
 			noDash = true
 		}
 
-		if dashImage == "" {
-			dashImage = fmt.Sprintf("%s:%s", defaultDashImage, getCompatibleVersion("dash", "", defaultDashVersion))
-		}
+		dashImage := fmt.Sprintf("%s:%s", defaultDashImage, getCompatibleVersion("dash", "", defaultDashVersion))
 
 		opts = &assets.AssetOpts{
 			FeatureFlags: assets.FeatureFlags{},
