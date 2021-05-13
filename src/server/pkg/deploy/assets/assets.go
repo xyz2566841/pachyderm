@@ -202,7 +202,6 @@ type AssetOpts struct {
 	Metrics        bool
 	Dynamic        bool
 	EtcdNodes      int
-	EtcdVolume     string
 	PostgresNodes  int
 	PostgresVolume string
 	DashOnly       bool
@@ -1777,14 +1776,8 @@ func WriteAssets(encoder serde.Encoder, opts *AssetOpts, objectStoreBackend Back
 		}
 	}
 
-	if opts.EtcdNodes > 0 && opts.EtcdVolume != "" {
-		return errors.Errorf("only one of --dynamic-etcd-nodes and --static-etcd-volume should be given, but not both")
-	}
-
 	// In the dynamic route, we create a storage class which dynamically
 	// provisions volumes, and run etcd as a stateful set.
-	// In the static route, we create a single volume, a single volume
-	// claim, and run etcd as a replication controller with a single node.
 	if persistentDiskBackend == LocalBackend {
 		if err := encoder.Encode(EtcdDeployment(opts, hostPath)); err != nil {
 			return err
@@ -1808,27 +1801,12 @@ func WriteAssets(encoder serde.Encoder, opts *AssetOpts, objectStoreBackend Back
 		if err := encoder.Encode(EtcdStatefulSet(opts, persistentDiskBackend, volumeSize)); err != nil {
 			return err
 		}
-	} else if opts.EtcdVolume != "" {
-		volume, err := EtcdVolume(persistentDiskBackend, opts, hostPath, opts.EtcdVolume, volumeSize)
-		if err != nil {
-			return err
-		}
-		if err = encoder.Encode(volume); err != nil {
-			return err
-		}
-		if err = encoder.Encode(EtcdVolumeClaim(volumeSize, opts)); err != nil {
-			return err
-		}
-		if err = encoder.Encode(EtcdDeployment(opts, "")); err != nil {
-			return err
-		}
 	} else {
-		return errors.Errorf("unless deploying locally, either --dynamic-etcd-nodes or --static-etcd-volume needs to be provided")
+		return errors.Errorf("--dynamic-etcd-nodes must be greater than 0")
 	}
 	if err := encoder.Encode(EtcdNodePortService(persistentDiskBackend == LocalBackend, opts)); err != nil {
 		return err
 	}
-
 	if opts.StorageV2 {
 		// In the dynamic route, we create a storage class which dynamically
 		// provisions volumes, and run postgres as a stateful set.

@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -302,7 +301,6 @@ func standardDeployCmds() []*cobra.Command {
 	var etcdMemRequest string
 	var etcdNodes int
 	var etcdStorageClassName string
-	var etcdVolume string
 	var exposeObjectAPI bool
 	var imagePullSecret string
 	var localRoles bool
@@ -324,9 +322,8 @@ func standardDeployCmds() []*cobra.Command {
 	var workerServiceAccountName string
 	appendGlobalFlags := func(cmd *cobra.Command) {
 		cmd.Flags().IntVar(&pachdShards, "shards", defaultPachdShards, "(rarely set) The maximum number of pachd nodes allowed in the cluster; increasing this number blindly can result in degraded performance.")
-		cmd.Flags().IntVar(&etcdNodes, "dynamic-etcd-nodes", 0, "Deploy etcd as a StatefulSet with the given number of pods.  The persistent volumes used by these pods are provisioned dynamically.  Note that StatefulSet is currently a beta kubernetes feature, which might be unavailable in older versions of kubernetes.")
-		cmd.Flags().StringVar(&etcdVolume, "static-etcd-volume", "", "Deploy etcd as a ReplicationController with one pod.  The pod uses the given persistent volume.")
-		cmd.Flags().StringVar(&etcdStorageClassName, "etcd-storage-class", "", "If set, the name of an existing StorageClass to use for etcd storage. Ignored if --static-etcd-volume is set.")
+		cmd.Flags().IntVar(&etcdNodes, "dynamic-etcd-nodes", 1, "Deploy etcd as a StatefulSet with the given number of pods.  The persistent volumes used by these pods are provisioned dynamically.  Note that StatefulSet is currently a beta kubernetes feature, which might be unavailable in older versions of kubernetes.")
+		cmd.Flags().StringVar(&etcdStorageClassName, "etcd-storage-class", "", "If set, the name of an existing StorageClass to use for etcd storage.")
 		cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Don't actually deploy pachyderm to Kubernetes, instead just print the manifest. Note that a pachyderm context will not be created, unless you also use `--create-context`.")
 		cmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format. One of: json|yaml")
 		cmd.Flags().StringVar(&logLevel, "log-level", "info", "The level of log messages to print options are, from least to most verbose: \"error\", \"info\", \"debug\".")
@@ -399,9 +396,6 @@ func standardDeployCmds() []*cobra.Command {
 		}
 		if noGuaranteed {
 			deprecationWarning("The no-guaranteed flag will be removed in a future version.  To remove resource limits, consider using the pachyderm/pachyderm Helm chart.")
-		}
-		if etcdVolume != "" {
-			deprecationWarning("Specification of a static etcd volume will be removed in a future version.")
 		}
 	}
 
@@ -503,7 +497,6 @@ func standardDeployCmds() []*cobra.Command {
 			EtcdCPURequest:             etcdCPURequest,
 			EtcdMemRequest:             etcdMemRequest,
 			EtcdNodes:                  etcdNodes,
-			EtcdVolume:                 etcdVolume,
 			EtcdStorageClassName:       etcdStorageClassName,
 			DashOnly:                   dashOnly,
 			NoDash:                     noDash,
@@ -896,13 +889,7 @@ If <object store backend> is \"s3\", then the arguments are:
 			if _, err := base64.StdEncoding.DecodeString(args[2]); err != nil {
 				return errors.Errorf("storage-account-key needs to be base64 encoded; instead got '%v'", args[2])
 			}
-			if opts.EtcdVolume != "" {
-				tempURI, err := url.ParseRequestURI(opts.EtcdVolume)
-				if err != nil {
-					return errors.Errorf("volume URI needs to be a well-formed URI; instead got '%v'", opts.EtcdVolume)
-				}
-				opts.EtcdVolume = tempURI.String()
-			}
+
 			volumeSize, err := strconv.Atoi(args[3])
 			if err != nil {
 				return errors.Errorf("volume size needs to be an integer; instead got %v", args[3])
@@ -1275,8 +1262,7 @@ You are going to delete persistent volumes where metadata is stored. If your
 persistent volumes were dynamically provisioned (i.e. if you used the
 "--dynamic-etcd-nodes" flag), the underlying volumes will be removed, making
 metadata such as repos, commits, pipelines, and jobs unrecoverable. If your
-persistent volume was manually provisioned (i.e. if you used the
-"--static-etcd-volume" flag), the underlying volume will not be removed.
+persistent volume was manually provisioned, the underlying volume will not be removed.
 `)
 			}
 
@@ -1383,8 +1369,7 @@ Delete persistent volumes where metadata is stored. If your persistent volumes
 were dynamically provisioned (i.e. if you used the "--dynamic-etcd-nodes"
 flag), the underlying volumes will be removed, making metadata such as repos,
 commits, pipelines, and jobs unrecoverable. If your persistent volume was
-manually provisioned (i.e. if you used the "--static-etcd-volume" flag), the
-underlying volume will not be removed.`)
+manually provisioned, the underlying volume will not be removed.`)
 	undeploy.Flags().BoolVarP(&includingIDE, "ide", "", false, "Delete the Pachyderm IDE deployment if it exists.")
 	undeploy.Flags().StringVar(&namespace, "namespace", "", "Kubernetes namespace to undeploy Pachyderm from.")
 	commands = append(commands, cmdutil.CreateAlias(undeploy, "undeploy"))
