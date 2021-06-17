@@ -53,6 +53,11 @@ type GlobalConfiguration struct {
 	PPSSpecCommitID string `env:"PPS_SPEC_COMMIT"`
 	// The name of the pipeline that this worker belongs to
 	PPSPipelineName string `env:"PPS_PIPELINE_NAME"`
+
+	// GCP-specific continuous profiling: https://cloud.google.com/profiler/docs.  'true'
+	// enables sending profiles, using information received from the GCE metadata server (so
+	// requires running on GCP).
+	GoogleCloudProfiler bool `env:"GOOGLE_CLOUD_PROFILER,default=false"`
 }
 
 // PachdFullConfiguration contains the full pachd configuration.

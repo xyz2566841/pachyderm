@@ -3,6 +3,7 @@ module github.com/pachyderm/pachyderm/v2
 go 1.16
 
 require (
+	cloud.google.com/go v0.49.0 // indirect
 	cloud.google.com/go/storage v1.3.0
 	github.com/Azure/azure-sdk-for-go v36.1.0+incompatible
 	github.com/aws/aws-lambda-go v1.13.3

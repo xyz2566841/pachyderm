@@ -27,6 +27,7 @@ import (
 	"github.com/pachyderm/pachyderm/v2/src/internal/metrics"
 	"github.com/pachyderm/pachyderm/v2/src/internal/migrations"
 	"github.com/pachyderm/pachyderm/v2/src/internal/netutil"
+	"github.com/pachyderm/pachyderm/v2/src/internal/profileutil"
 	"github.com/pachyderm/pachyderm/v2/src/internal/serviceenv"
 	"github.com/pachyderm/pachyderm/v2/src/internal/tls"
 	"github.com/pachyderm/pachyderm/v2/src/internal/tracing"
@@ -119,6 +120,11 @@ func doEnterpriseMode(config interface{}) (retErr error) {
 		log.Printf("no Jaeger collector found (JAEGER_COLLECTOR_SERVICE_HOST not set)")
 	}
 	env := serviceenv.InitWithKube(serviceenv.NewConfiguration(config))
+	if env.Config().GoogleCloudProfiler {
+		if err := profileutil.StartCloudProfiler("pachyderm-pachd-enterprise"); err != nil {
+			return errors.Wrapf(err, "error starting cloud profiler")
+		}
+	}
 	debug.SetGCPercent(env.Config().GCPercent)
 	env.InitDexDB()
 
@@ -373,6 +379,11 @@ func doSidecarMode(config interface{}) (retErr error) {
 		log.Printf("no Jaeger collector found (JAEGER_COLLECTOR_SERVICE_HOST not set)")
 	}
 	env := serviceenv.InitWithKube(serviceenv.NewConfiguration(config))
+	if env.Config().GoogleCloudProfiler {
+		if err := profileutil.StartCloudProfiler("pachyderm-pachd-sidecar"); err != nil {
+			return errors.Wrapf(err, "error starting cloud profiler")
+		}
+	}
 	debug.SetGCPercent(env.Config().GCPercent)
 	if env.Config().EtcdPrefix == "" {
 		env.Config().EtcdPrefix = col.DefaultPrefix
@@ -529,6 +540,11 @@ func doFullMode(config interface{}) (retErr error) {
 		log.Printf("no Jaeger collector found (JAEGER_COLLECTOR_SERVICE_HOST not set)")
 	}
 	env := serviceenv.InitWithKube(serviceenv.NewConfiguration(config))
+	if env.Config().GoogleCloudProfiler {
+		if err := profileutil.StartCloudProfiler("pachyderm-pachd-full"); err != nil {
+			return errors.Wrapf(err, "error starting cloud profiler")
+		}
+	}
 	debug.SetGCPercent(env.Config().GCPercent)
 	env.InitDexDB()
 	if env.Config().EtcdPrefix == "" {
