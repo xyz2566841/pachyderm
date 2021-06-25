@@ -4,3 +4,5 @@ enterpriseServer:
   enabled: true
 pachd:
   enabled: false
+  storage:
+    backend: LOCAL # Needed for PVC
