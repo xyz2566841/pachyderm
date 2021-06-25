@@ -2,6 +2,8 @@ dash:
   enabled: false
 enterpriseServer:
   enabled: true
+  service:
+    type: NodePort
 pachd:
   enabled: false
   storage:
