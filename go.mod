@@ -103,13 +103,13 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.12.0
 	helm.sh/helm/v3 v3.1.2
 	honnef.co/go/tools v0.1.3 // indirect
-	k8s.io/api v0.17.4
-	k8s.io/apimachinery v0.17.4
+	k8s.io/api v0.18.8
+	k8s.io/apimachinery v0.18.8
 	k8s.io/cli-runtime v0.17.4
 	k8s.io/client-go v12.0.0+incompatible
 	modernc.org/mathutil v1.0.0
 	rsc.io/letsencrypt v0.0.3 // indirect
-	sigs.k8s.io/yaml v1.1.0
+	sigs.k8s.io/yaml v1.2.0
 )
 
 // Holy shit, the docker library versions are a clusterfuck, see https://github.com/moby/moby/issues/39302
@@ -118,4 +118,4 @@ replace github.com/docker/docker => github.com/docker/docker v1.4.2-0.2019121311
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
 
-replace k8s.io/client-go => k8s.io/client-go v0.0.0-20190718183610-8e956561bbf5
+replace k8s.io/client-go => k8s.io/client-go v0.18.8
